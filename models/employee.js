@@ -5,7 +5,8 @@ const employeeSchema = new mongoose.Schema({
   age: { type: Number, required: true },
   gender: { type: String, required: true },
   address: { type: String, required: true },
-  designation: { type: String, required: true }
+  designation: { type: String, required: true },
+  mobile : {type: Number, required : false}
 });
 
 const Employee = mongoose.model('Employee', employeeSchema);

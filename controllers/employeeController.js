@@ -11,7 +11,7 @@ async function addEmployee(req, res) {
 }
 
 // Get employee details
-async function getEmployee(req, res) {
+async function getEmployees(req, res) {
   try {
     const employees = await Employee.find();
     res.json({ success: true, data: employees });
@@ -19,7 +19,14 @@ async function getEmployee(req, res) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
-
+async function getEmployee(req, res) {
+  try {
+    const employees = await Employee.findById(req.params.id);
+    res.json({ success: true, data: employees });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
 // Update employee details
 async function updateEmployee(req, res) {
   try {
@@ -47,6 +54,7 @@ async function deleteEmployee(req, res) {
 module.exports = {
   addEmployee,
   getEmployee,
+  getEmployees,
   updateEmployee,
   deleteEmployee
 };

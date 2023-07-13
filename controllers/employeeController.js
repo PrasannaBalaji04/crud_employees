@@ -4,7 +4,9 @@ var mongoose = require('mongoose');
 // Add employee details to the database
 async function addEmployee(req, res) {
   try {
+    console.log("employee");
     const employee = await Employee.create(req.body);
+    console.log(employee);
     res.status(201).json({ success: true, data: employee });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

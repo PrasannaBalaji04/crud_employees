@@ -13,6 +13,7 @@ async function addEmployee(req, res) {
   }
 }
 
+
 // Get employee details
 async function getEmployees(req, res) {
   try {

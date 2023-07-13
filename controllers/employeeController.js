@@ -26,7 +26,7 @@ async function getEmployees(req, res) {
 async function getEmployee(req, res) {
   try {
     console.log(req.params.id);
-    if(!mongoose.Types.ObjectId.isValid(req.params.id)){
+    if(!mongoose.Types.ObjectId.isValid(req.params.id) ){
       res.status(400).json({ success: false, error: "Id field is not valid" });
     }else{
       const employees = await Employee.findById(req.params.id);

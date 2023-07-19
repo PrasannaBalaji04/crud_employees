@@ -1,17 +1,88 @@
 const Employee = require('../models/employee');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const{validateEmail, validatePassword} = require('../service/validators');
 var mongoose = require('mongoose');
 
-// Add employee details to the database
-async function addEmployee(req, res) {
+
+// Sign Up employee to the db
+async function signUp(req,res){
   try {
-    const employee = await Employee.create(req.body);
-    console.log(employee);
-    res.status(201).json({ success: true, data: employee });
+    
+    const { name, email, password, age , gender, address, designation, mobile } = req.body; //try mobile also
+    if (!validateEmail(email)) {
+      console.log("email not valid");
+      return res.status(400).json({ error: 'Invalid email address' });
+    }
+    const passwordErrors = validatePassword(password);
+    if (passwordErrors.length > 0) {
+      console.log("password not valid");
+      return res.status(400).json({ error: 'Invalid password', passwordErrors });
+    }
+
+    // Check if the email is already registered
+    const existingUser = await Employee.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ success: false, message: 'Email already registered' });
+    }
+
+    // Encrypt the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    // Create a new employee with the encrypted password
+    const employee = await Employee.create({
+      name,
+      email,
+      password : hashedPassword,
+      age,
+      gender,
+      address,
+      designation,
+      mobile
+    });
+
+    res.status(201).json({ success: true, message: 'User created successfully' });
+
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
 
+// Log in a user and generate a JWT token
+async function login(req, res) {
+  try {
+    const { email, password } = req.body;
+
+    // Find the employee by email
+    const employee = await Employee.findOne({ email });
+    if (!employee) {
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+
+    // Validate the password
+    const isPasswordValid = await bcrypt.compare(password, employee.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+
+    // Generate a JWT token
+    const token = jwt.sign({ id: employee._id }, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
+
+    res.json({ success: true, token });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+// Add employee details to the database
+async function addEmployee(req, res) {
+  try {
+    const employee = await Employee.create(req.body);
+    // console.log(employee);
+    res.status(201).json({ success: true, data: employee });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
 
 // Get employee details
 async function getEmployees(req, res) {
@@ -77,5 +148,7 @@ module.exports = {
   getEmployee,
   getEmployees,
   updateEmployee,
-  deleteEmployee
+  deleteEmployee,
+  signUp,
+  login
 };

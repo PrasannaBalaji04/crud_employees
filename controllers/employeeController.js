@@ -37,6 +37,7 @@ async function signUp(req,res){
       gender,
       address,
       designation,
+      token,
       mobile
     });
 
@@ -65,12 +66,46 @@ async function login(req, res) {
     }
 
     // Generate a JWT token
-    const token = jwt.sign({ id: employee._id }, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
-
+    const token = jwt.sign({ id: employee._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+    const refreshToken = jwt.sign({id : employee._id}, process.env.REFRESH_TOKEN_SECRET, {expiresIn: '1D'});
+    employee.updateOne()
+    res.cookie('jwt', refreshToken, { httpOnly: true, 
+      maxAge: 24 * 60 * 60 * 1000 });
     res.json({ success: true, token });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
+}
+
+// Refresh token
+async function refresh(req, res){
+  // console.log("Hi");
+
+  if (req.cookies?.jwt) {
+    // console.log("called");
+
+
+    // Destructuring refreshToken from cookie
+    const refreshToken = req.cookies.jwt;
+    // console.log(refreshToken);
+
+    // Verifying refresh token
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, 
+    (err, decoded) => {
+        if (err) {
+
+            // Wrong Refesh Token
+            return res.status(406).json({ message: 'Unauthorized' });
+        }
+        else {
+            // Correct token we send a new access token
+            const accessToken = jwt.sign({ id: decoded.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+            return res.json({ accessToken });
+        }
+    })
+    } else {
+        return res.status(406).json({ message: 'Unauthorized' });
+    }
 }
 
 // Add employee details to the database
@@ -149,6 +184,7 @@ module.exports = {
   getEmployees,
   updateEmployee,
   deleteEmployee,
+  refresh,
   signUp,
   login
 };

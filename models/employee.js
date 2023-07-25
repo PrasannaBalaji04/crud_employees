@@ -8,6 +8,7 @@ const employeeSchema = new mongoose.Schema({
   gender: { type: String, required: true },
   address: { type: String, required: true },
   designation: { type: String, required: true },
+  token : {type: String, required: true},
   mobile : {type: Number, required : false}
 });
 

@@ -111,9 +111,17 @@ async function refresh(req, res){
 // Add employee details to the database
 async function addEmployee(req, res) {
   try {
-    const employee = await Employee.create(req.body);
-    // console.log(employee);
-    res.status(201).json({ success: true, data: employee });
+    const email = req.body.email;
+    const existingEmployee = await Employee.findOne({ email });
+      if (existingEmployee) {
+        console.log('USER ALREADY REGISTERED');
+        res.status(400).json({success: false, error: 'Employee already registered'}); // Bad request - 400
+      }
+     else{ 
+      const employee = await Employee.create(req.body);
+      console.log(employee);
+      res.status(201).json({ success: true, data: employee });
+     }
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

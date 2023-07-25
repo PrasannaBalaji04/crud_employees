@@ -9,7 +9,7 @@ function authenticateToken(req, res, next) {
     return res.status(401).json({ success: false, message: 'Missing token' });
   }
 
-  jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
     if (error) {
       return res.status(403).json({ success: false, message: 'Invalid token' });
     }

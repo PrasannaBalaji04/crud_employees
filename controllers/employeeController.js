@@ -9,7 +9,7 @@ var mongoose = require('mongoose');
 async function signUp(req,res){
   try {
     
-    const { name, email, password, age , gender, address, designation, mobile } = req.body; //try mobile also
+    const { name, email, password, age , gender, address, designation, token, mobile } = req.body; //try mobile also
     if (!validateEmail(email)) {
       console.log("email not valid");
       return res.status(400).json({ error: 'Invalid email address' });
@@ -44,6 +44,7 @@ async function signUp(req,res){
     res.status(201).json({ success: true, message: 'User created successfully' });
 
   } catch (error) {
+    console.log("err");
     res.status(500).json({ success: false, error: error.message });
   }
 }
@@ -52,7 +53,6 @@ async function signUp(req,res){
 async function login(req, res) {
   try {
     const { email, password } = req.body;
-
     // Find the employee by email
     const employee = await Employee.findOne({ email });
     if (!employee) {
@@ -68,7 +68,14 @@ async function login(req, res) {
     // Generate a JWT token
     const token = jwt.sign({ id: employee._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
     const refreshToken = jwt.sign({id : employee._id}, process.env.REFRESH_TOKEN_SECRET, {expiresIn: '1D'});
-    employee.updateOne()
+
+    const updateOperation = {
+      $set: {
+        token: token,
+      },
+    };
+    
+    const result = await Employee.updateOne(employee, updateOperation);
     res.cookie('jwt', refreshToken, { httpOnly: true, 
       maxAge: 24 * 60 * 60 * 1000 });
     res.json({ success: true, token });

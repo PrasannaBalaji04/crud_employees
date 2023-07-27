@@ -15,7 +15,7 @@ const { get } = require('mongoose');
 
 router.post('/add', authenticateToken, addEmployee);
 router.get('/', authenticateToken,getEmployees);
-router.get('/', authenticateToken, getEmployee);
+router.get('/:id', authenticateToken, getEmployee);
 router.put('/:id', authenticateToken, updateEmployee);
 router.delete('/:id', authenticateToken, deleteEmployee);
 router.post('/refresh', refresh);

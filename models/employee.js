@@ -2,10 +2,13 @@ const mongoose = require('mongoose');
 
 const employeeSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  email: {type: String, required:true },
+  password : {type: String, required : true},
   age: { type: Number, required: true },
   gender: { type: String, required: true },
   address: { type: String, required: true },
   designation: { type: String, required: true },
+  token : {type: String, required: false},
   mobile : {type: Number, required : false}
 });
 
